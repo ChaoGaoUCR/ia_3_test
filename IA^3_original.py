@@ -222,10 +222,10 @@ def train(
         test_size=val_set_size, shuffle=True, seed=42
     )
     train_data = (
-        train_val["train"].shuffle().map(generate_and_tokenize_prompt)
+        train_val["train"].shuffle().map(generate_and_tokenize_prompt, remove_columns=train_val["train"].column_names)
     )
     val_data = (
-        train_val["test"].shuffle().map(generate_and_tokenize_prompt)
+        train_val["test"].shuffle().map(generate_and_tokenize_prompt, remove_columns=train_val["val"].column_names)
     )
 
     if not ddp and torch.cuda.device_count() > 1:
@@ -241,7 +241,7 @@ def train(
         eval_dataset=val_data,
         args=transformers.TrainingArguments(
             per_device_train_batch_size=micro_batch_size,
-            # remove_unused_columns=False,
+            remove_unused_columns=False,
             gradient_accumulation_steps=gradient_accumulation_steps,
             warmup_steps=100,
             num_train_epochs=4,
